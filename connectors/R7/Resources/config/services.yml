@@ -1,0 +1,9 @@
+services:
+
+  only_office.main:
+    class: OnlyOfficeBundle\Services\Main
+    arguments: ["@circle.restclient", "%twake_api_url%", "%server_url%", "%apps_configuration%"]
+
+  only_office.event:
+    class: OnlyOfficeBundle\Services\Event
+    arguments: ["@only_office.main", "@app.twake_doctrine"]
