@@ -9,12 +9,10 @@ use ConnectorsBundle\Services\MainConnectorService;
 class Main extends MainConnectorService
 {
 
-    protected $app_name = "only_office";
+    protected $app_name = "r7_office";
 
-    public function __construct($rest_client, $twake_api_route, $server_url, $apps_configuration)
-    {
-        parent::__construct($rest_client, $twake_api_route, $server_url, $apps_configuration);
+    public function __construct($app) {
+        $this->main_service = $app->getServices()->get("connectors.common.main");
     }
-
 
 }
