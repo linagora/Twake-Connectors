@@ -12,6 +12,7 @@
 </div>
 
 <script type="text/javascript">
+
     window.workspaceId = "{{ workspaceId }}";
     window.user = {
         id: "{{ userid }}",
@@ -58,7 +59,7 @@
                 token: doc.token,
                 type: (screen.width < 600) ? 'mobile' : 'desktop',
                 editorConfig: {
-                    callbackUrl: window.baseURL + "save?token=" + doc.token +"&groupId=" + "{{ groupid }}",
+                    callbackUrl: window.baseURL + "save?fileId="+doc.file_id+"&token=" + doc.token +"&groupId=" + "{{ groupid }}",
                     "lang": window.user.language,
                     "user": {
                         "id": window.user.id,
@@ -109,6 +110,7 @@
             fileType: "{{ fileType }}",
             key: data.key,
             token: data.token,
+            file_id: "{{ file_id }}",
             permissions: {
                 download: true,
                 edit: !{{ preview }},
