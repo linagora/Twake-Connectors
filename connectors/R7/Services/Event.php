@@ -125,6 +125,7 @@ class Event
 
         $fToken = $request->query->get("token");
         $group_id = $request->query->get("groupId");
+        $file_id = $request->query->get("fileId");
         $request = $request->request->all();
 
         if ($request["status"] == "2") {
@@ -132,27 +133,20 @@ class Event
             $key = $request["key"];
             $document = $request["url"];
 
-            $fileKey = $this->main_service->getDocument("file_keys_" . $key);
+            $fileKey = $this->main_service->getDocument("file_keys_" . $file_id);
 
             if ($fileKey != null) {
-                $file = $this->main_service->getDocument("file_" . $fileKey["file_id"] . "_" . $fToken);
+                $file = $this->main_service->getDocument("file_" . $file_id . "_" . $fToken);
 
                 if ($file != null) {
-                    $oldFilename = $fileKey->getName();
+                    $oldFilename = $fileKey["name"];
                     $oldFileParts = explode(".", $oldFilename);
                     array_pop($oldFileParts);
                     $newExtension = array_pop(explode(".", $document));
                     $newName = join(".", $oldFileParts) . "." . $newExtension;
 
-                    $this->main_service->saveDocument("file_keys_" . $key, null);
-                    $key = bin2hex(random_bytes(64));
-                    $file = $this->main_service->saveDocument("file_keys_" . $key, [
-                        "file_id" => $fileKey["file_id"],
-                        "name" => $newName,
-                        "id" => $fileKey["id"],
-                        "workspace_id" => $fileKey["workspace_id"],
-                        "key" => $key,
-                    ]);
+                    $fileKey["key"] = bin2hex(random_bytes(64));
+                    $this->main_service->saveDocument("file_keys_" . $file_id, $fileKey);
 
                     $url = $document;
                     //IMPORTANT ! Disable local files !!!
@@ -170,7 +164,7 @@ class Event
                         $data = array(
                             "group_id" => $group_id,
                             "object" => array(
-                                "id" => $file->getFileId(),
+                                "id" => $file["file_id"],
                                 "name" => $newName,
                             ),
                             "file_url" => $url
@@ -209,25 +203,28 @@ class Event
             if (!$data_file || !isset($data_file["object"]))
                 return new Response(array("error" => "file not found"));
 
-            $em = $this->doctrine;
-            $file = new OnlyofficeFile($workspaceId, $fId);
-            $em->persist($file);
-            $em->flush();
+            $file = [
+                "workspace_id" => $workspaceId,
+                "file_id" => $fId,
+                "token" => base64_encode(bin2hex(random_bytes(20))),
+                "date" => date("U"),
+            ];
+            $this->main_service->saveDocument("file_" . $file["file_id"] . "_" . $file["token"], $file);
 
-            $fileKey = $em->getRepository("OnlyOfficeBundle:OnlyofficeFileKeys")->findOneBy(Array("fileId" => $fId));
-
+            $fileKey = $this->main_service->getDocument("file_keys_" . $fId);
             if (!$fileKey) {
-                $fileKey = new  OnlyofficeFileKeys($workspaceId, $fId);
+                $fileKey = [
+                    "workspace_id" => $workspaceId,
+                    "file_id" => $fId,
+                    "key" => bin2hex(random_bytes(64))
+                ];
             }
-
-            $fileKey->setName($filename);
-
-            $em->persist($fileKey);
-            $em->flush();
+            $fileKey["name"] = $filename;
+            $this->main_service->saveDocument("file_keys_" . $fId, $fileKey);
 
             return new JsonResponse(Array(
-                "token" => $file->getToken(),
-                "key" => $fileKey->getKey(),
+                "token" => $file["token"],
+                "key" => $fileKey["key"],
                 "file_id" => $fId,
                 "filename" => $filename
             ));
@@ -245,24 +242,19 @@ class Event
         $fId = $request->query->all()["fileId"];
         $group_id = $request->query->all()["groupId"];
 
-        $em = $this->doctrine;
-
-        /** @var OnlyofficeFile $file */
-        $file = $em->getRepository("OnlyOfficeBundle:OnlyofficeFile")->findOneBy(Array("fileId" => $fId, "token" => $fToken));
+        $file = $this->main_service->getDocument("file_" . $fId . "_" . $fToken);
 
         if ($file != null) {
 
-            if ($file->getDate() > (new \DateTime())->getTimestamp() - 60 * 60) {
+            if ($file["date"] > (new \DateTime())->getTimestamp() - 60 * 60) {
 
-                $file->resetDate();
-                $em = $this->doctrine;
-                $em->persist($file);
-                $em->flush();
+                $file["date"] = (new \DateTime())->getTimestamp();
+                $this->main_service->saveDocument("file_" . $fId . "_" . $fToken, $file);
 
                 $data = array(
-                    "workspace_id" => $file->getWorkspaceId(),
+                    "workspace_id" => $file["workspace_id"],
                     "group_id" => $group_id,
-                    "file_id" => $file->getFileId()
+                    "file_id" => $file["file_id"]
 
                 );
 
@@ -271,8 +263,7 @@ class Event
 
             }
 
-            $em->remove($file);
-            $em->flush();
+            $this->main_service->saveDocument("file_" . $fId . "_" . $fToken, null);
 
         }
 
