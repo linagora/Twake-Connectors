@@ -4,38 +4,66 @@ namespace BuiltInConnectors\Connectors\R7;
 class ConnectorDefinition
 {
   public $configuration = [
-    'jitsi_domain' => 'meet.jit.si'
+    //TODO add configuration needed for this connector
   ];
 
   public $definition = [
       'app_group_name' => 'twake',
-      'categories' => [ 'voice_video' ],
-      'name' => 'Jitsi',
-      'simple_name' => 'jitsi',
-      'description' => 'Jitsi allows you to create and join video calls directly from Twake.',
-      'icon_url' => 'jitsi.png',
+      'categories' => [],
+      'name' => 'R7',
+      'simple_name' => 'r7_office',
+      'description' => 'R7 allows you to edit and view spreadsheets, documents and slides in Twake.',
+      'icon_url' => 'R7.png',
       'website' => 'https://twake.app',
-      'privileges' => [],
+      'privileges' => [
+        'workspace_drive'
+      ],
       'capabilities' =>
       [
-        'messages_send',
-        'display_modal',
-        'messages_save',
+        'drive_save',
+        'display_modal'
       ],
       'hooks' => [],
-      'display' =>
-      [
-        'messages_module' =>
-        [
-          'right_icon' => true,
-          'commands' =>
-          [
+      'display' => [
+        'drive_module' => [
+          'can_open_files' => [
+            'url' => 'https://connectors.api.twake.app/only_office/load',
+            'preview_url' => 'https://connectors.api.twake.app/only_office/load?preview=1',
+            'main_ext' => [
+              'xlsx',
+              'pptx',
+              'docx',
+              'xls',
+              'ppt',
+              'doc',
+              'odt',
+              'ods',
+              'odp',
+            ],
+            'other_ext' => [
+              'txt',
+              'html',
+              'csv',
+            ],
+          ],
+          'can_create_files' => [
             [
-              'command' => 'Meeting name',
-              'description' => 'Create a Jisti call',
-            ]
-          ]
-        ]
+              'url' => 'https://connectors.api.twake.app/public/onlyoffice/empty.docx',
+              'filename' => 'Untitled.docx',
+              'name' => 'ONLYOFFICE Word Document',
+            ],
+            [
+              'url' => 'https://connectors.api.twake.app/public/onlyoffice/empty.xlsx',
+              'filename' => 'Untitled.xlsx',
+              'name' => 'ONLYOFFICE Excel Document',
+            ],
+            [
+              'url' => 'https://connectors.api.twake.app/public/onlyoffice/empty.pptx',
+              'filename' => 'Untitled.pptx',
+              'name' => 'ONLYOFFICE PowerPoint Document',
+            ],
+          ],
+        ],
       ],
       'api_allowed_ips' => '*',
       'api_event_url' => '/event'

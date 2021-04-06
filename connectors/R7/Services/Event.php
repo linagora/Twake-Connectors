@@ -13,19 +13,9 @@ use Symfony\Component\HttpFoundation\Session\Session;
 class Event
 {
 
-    public function __construct($main_service,$doctrine) {
-        $this->main_service = $main_service;
-        $this->doctrine = $doctrine;
+    public function __construct($app) {
+        $this->main_service = $app->getServices()->get("connectors.common.main");
     }
-
-    /**
-     * @return mixed
-     */
-    public function getDoctrine()
-    {
-        return $this->doctrine;
-    }
-
 
     public function getParametersForMode($mode)
     {
@@ -142,26 +132,27 @@ class Event
             $key = $request["key"];
             $document = $request["url"];
 
-            $fileKey = $this->doctrine->getRepository("OnlyOfficeBundle:OnlyofficeFileKeys")->findOneBy(Array("key" => $key));
+            $fileKey = $this->main_service->getDocument("file_keys_" . $key);
 
             if ($fileKey != null) {
-                /** @var OnlyofficeFile $file */
-                $file = $this->doctrine->getRepository("OnlyOfficeBundle:OnlyofficeFile")->findOneBy(Array("fileId" => $fileKey->getFileId(), "token" => $fToken));
+                $file = $this->main_service->getDocument("file_" . $fileKey["file_id"] . "_" . $fToken);
 
                 if ($file != null) {
-
-
                     $oldFilename = $fileKey->getName();
                     $oldFileParts = explode(".", $oldFilename);
                     array_pop($oldFileParts);
                     $newExtension = array_pop(explode(".", $document));
                     $newName = join(".", $oldFileParts) . "." . $newExtension;
 
-                    $fileKey->setName($newName);
-                    $fileKey->newKey();
-
-                    $this->doctrine->persist($fileKey);
-                    $this->doctrine->flush();
+                    $this->main_service->saveDocument("file_keys_" . $key, null);
+                    $key = bin2hex(random_bytes(64));
+                    $file = $this->main_service->saveDocument("file_keys_" . $key, [
+                        "file_id" => $fileKey["file_id"],
+                        "name" => $newName,
+                        "id" => $fileKey["id"],
+                        "workspace_id" => $fileKey["workspace_id"],
+                        "key" => $key,
+                    ]);
 
                     $url = $document;
                     //IMPORTANT ! Disable local files !!!
