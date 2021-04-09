@@ -5,7 +5,7 @@ namespace BuiltInConnectors\Connectors\R7\Controller;
 use Common\BaseController;
 use Common\Http\Response;
 use Common\Http\Request;
-use BuiltInConnectors\Connectors\Jitsi\ConnectorDefinition;
+use BuiltInConnectors\Connectors\R7\ConnectorDefinition;
 
 class Index extends BaseController
 {
@@ -51,10 +51,10 @@ class Index extends BaseController
 
         if ($data){
             $template = $twig->load("Templates/index.html.twig");            
-            return $template->render($data);
+            return new Response($template->render($data));
         }else{
             $template = $twig->load("Templates/file_error.html.twig");            
-            return $template->render(Array());
+            return new Response($template->render(Array()));
         }
     }
 
