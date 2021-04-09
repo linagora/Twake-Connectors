@@ -40,7 +40,7 @@ class Index extends BaseController
       return new Response(file_get_contents($route));
     }
 
-    public function editorAction(Request $request, $mode)
+    public function editor(Request $request, $mode)
     {
         $data = $this->get("connectors.r7.event")->editorAction($request, $mode, $this->get('session'));
         if ($data)
@@ -49,22 +49,22 @@ class Index extends BaseController
             return $this->render('@OnlyOffice/Default/file_error.html.twig', Array());
     }
     
-    public function saveAction(Request $request, $mode)
+    public function save(Request $request, $mode)
     {
         return $this->get("connectors.r7.event")->saveAction($request, $mode);
     }
 
-    public function openAction(Request $request, $mode)
+    public function open(Request $request, $mode)
     {
         return $this->get("connectors.r7.event")->openAction($request, $mode, $this->get('session'));
     }
 
-    public function readAction(Request $request, $mode)
+    public function read(Request $request, $mode)
     {
         return $this->get("connectors.r7.event")->readAction($request, $mode);
     }
 
-    public function loadAction(Request $request){
+    public function load(Request $request){
         $data =  $this->get("connectors.r7.event")->loadAction($request, $this->get('session'));
         if(!is_array($data)){
             return $data;
