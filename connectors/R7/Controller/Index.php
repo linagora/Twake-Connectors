@@ -36,7 +36,6 @@ class Index extends BaseController
     {
       $extension = preg_replace("/[^a-z]+/", "", $request->query->all()["extension"]);
       $route = realpath(__DIR__."/../Resources/medias/empty." . $extension);
-      $filename = basename($route);
       return new Response(file_get_contents($route));
     }
 
@@ -44,10 +43,19 @@ class Index extends BaseController
     {
         $mode = explode("?", explode("/", explode("r7_office/", $_SERVER["REQUEST_URI"])[1])[0])[0];
         $data = $this->get("connectors.r7.event")->editorAction($request, $mode, $this->get('session'));
-        if ($data)
-            return $this->render('@OnlyOffice/Default/index.html.twig', $data);
-        else
-            return $this->render('@OnlyOffice/Default/file_error.html.twig', Array());
+
+        $loader = new \Twig\Loader\FilesystemLoader(realpath(__DIR__.'/../Views/'));
+        $twig = new \Twig\Environment($loader, [
+            'cache' =>  $this->app->getAppRootDir() . "/" . $this->app->getContainer()->get("configuration", "twig.cache"),
+        ]);
+
+        if ($data){
+            $template = $twig->load("Templates/index.html.twig");            
+            return $template->render($data);
+        }else{
+            $template = $twig->load("Templates/file_error.html.twig");            
+            return $template->render(Array());
+        }
     }
 
     public function read(Request $request)
