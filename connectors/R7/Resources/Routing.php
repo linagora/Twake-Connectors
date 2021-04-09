@@ -15,5 +15,6 @@ class Routing extends BaseRouting
       "empty" => ["handler" => "Index:empty", "methods" => ["GET"]],
       "{mode}/editor" => ["handler" => "Index:editor", "methods" => ["GET"]],
       "{mode}/read" => ["handler" => "Index:read", "methods" => ["GET", "POST"]],
+      "icon" => ["handler" => "Index:icon", "methods" => ["GET"]],
     ];
 }
