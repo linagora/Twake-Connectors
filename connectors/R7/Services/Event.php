@@ -4,10 +4,8 @@
 namespace BuiltInConnectors\Connectors\R7\Services;
 use BuiltInConnectors\Connectors\R7\Entity\OnlyofficeFile;
 use BuiltInConnectors\Connectors\R7\Entity\OnlyofficeFileKeys;
-use Symfony\Component\HttpFoundation\Request;
-use http\Env\Response;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Session\Session;
+use Common\Http\Response;
+use Common\Http\Request;
 
 
 class Event
@@ -162,7 +160,7 @@ class Event
 
                     if (!$url) {
 
-                        return new JsonResponse(Array("error" => 1));
+                        return new Response(Array("error" => 1));
 
                     } else {
                         $data = array(
@@ -176,7 +174,7 @@ class Event
                         );
 
                         $this->main_service->postApi("drive/save", $data, 60);
-                        return new JsonResponse();
+                        return new Response();
 
                     }
 
@@ -186,7 +184,7 @@ class Event
 
         }
 
-        return new JsonResponse(Array("error" => 0));
+        return new Response(Array("error" => 0));
     }
 
     public function openAction(Request $request, $mode, $session=null)
@@ -226,7 +224,7 @@ class Event
             $fileKey["name"] = $filename;
             $this->main_service->saveDocument("file_keys_" . $fId, $fileKey);
 
-            return new JsonResponse(Array(
+            return new Response(Array(
                 "token" => $file["token"],
                 "key" => $fileKey["key"],
                 "file_id" => $fId,
@@ -234,7 +232,7 @@ class Event
             ));
 
         }
-        return new JsonResponse();
+        return new Response();
     }
 
     public function readAction(Request $request, $mode)
@@ -288,7 +286,7 @@ class Event
         $token_identity =  $this->main_service->postApi("core/token", array("token" => $token), 60);
         error_log(json_encode($token_identity));
         if (!$token_identity)
-            return new JsonResponse(array("error" => "Invalid token"));
+            return new Response(array("error" => "Invalid token"));
 
 
         $user_id = $token_identity["user_id"];
