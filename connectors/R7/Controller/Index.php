@@ -32,7 +32,7 @@ class Index extends BaseController
       return new Response(file_get_contents($route));
     }
 
-    public function empty()
+    public function empty(Request $request)
     {
       $extension = preg_replace("/[^a-z]+/", "", $request->query->all()["extension"]);
       $route = realpath(__DIR__."/../Resources/medias/empty." . $extension);
@@ -40,28 +40,30 @@ class Index extends BaseController
       return new Response(file_get_contents($route));
     }
 
-    public function editor(Request $request, $mode)
+    public function editor(Request $request)
     {
+        $mode = explode("?", explode("/", explode("r7_office/", $_SERVER["REQUEST_URI"])[1])[0])[0];
         $data = $this->get("connectors.r7.event")->editorAction($request, $mode, $this->get('session'));
         if ($data)
             return $this->render('@OnlyOffice/Default/index.html.twig', $data);
         else
             return $this->render('@OnlyOffice/Default/file_error.html.twig', Array());
     }
-    
-    public function save(Request $request, $mode)
-    {
-        return $this->get("connectors.r7.event")->saveAction($request, $mode);
-    }
 
-    public function open(Request $request, $mode)
+    public function read(Request $request)
     {
-        return $this->get("connectors.r7.event")->openAction($request, $mode, $this->get('session'));
-    }
-
-    public function read(Request $request, $mode)
-    {
+        $mode = explode("?", explode("/", explode("r7_office/", $_SERVER["REQUEST_URI"])[1])[0])[0];
         return $this->get("connectors.r7.event")->readAction($request, $mode);
+    }
+    
+    public function save(Request $request)
+    {
+        return $this->get("connectors.r7.event")->saveAction($request);
+    }
+
+    public function open(Request $request)
+    {
+        return $this->get("connectors.r7.event")->openAction($request, $this->get('session'));
     }
 
     public function load(Request $request){

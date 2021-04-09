@@ -122,7 +122,7 @@ class Event
     /**
      * Save / open files
      */
-    public function saveAction(Request $request, $mode)
+    public function saveAction(Request $request)
     {
 
         $fToken = $request->query->get("token");
@@ -187,7 +187,7 @@ class Event
         return new Response(Array("error" => 0));
     }
 
-    public function openAction(Request $request, $mode, $session=null)
+    public function openAction(Request $request, $session=null)
     {
         if($session){
           $user_id = $session->get('user_id');

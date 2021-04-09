@@ -11,9 +11,9 @@ class Routing extends BaseRouting
       "{mode}/save" => ["handler" => "Index:save", "methods" => ["GET", "POST"]],
       "{mode}/new" => ["handler" => "Index:new", "methods" => ["GET", "POST"]],
       "{mode}/open" => ["handler" => "Index:open", "methods" => ["GET", "POST"]],
-      "{mode}/read" => ["handler" => "Index:read", "methods" => ["GET", "POST"]],
       "load" => ["handler" => "Index:load", "methods" => ["GET", "POST"]],
       "empty" => ["handler" => "Index:empty", "methods" => ["GET"]],
       "{mode}" => ["handler" => "Index:editor", "methods" => ["GET"]],
+      "{mode}/read" => ["handler" => "Index:read", "methods" => ["GET", "POST"]],
     ];
 }
