@@ -32,6 +32,14 @@ class Index extends BaseController
       return new Response(file_get_contents($route));
     }
 
+    public function empty()
+    {
+      $extension = preg_replace("/[^a-z]+/", "", $request->query->all()["extension"]);
+      $route = realpath(__DIR__."/../Resources/medias/empty." . $extension);
+      $filename = basename($route);
+      return new Response(file_get_contents($route));
+    }
+
     public function editorAction(Request $request, $mode)
     {
         $data = $this->get("connectors.r7.event")->editorAction($request, $mode, $this->get('session'));

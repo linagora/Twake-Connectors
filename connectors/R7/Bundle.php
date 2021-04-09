@@ -32,11 +32,11 @@ class Bundle extends BaseBundle
     }
 
     public function getDefinition(){
-      return (new ConnectorDefinition())->definition;
+      return (new ConnectorDefinition($this->app))->definition;
     }
 
     public function getConfiguration(){
-      return (new ConnectorDefinition())->configuration;
+      return (new ConnectorDefinition($this->app))->configuration;
     }
 
 }

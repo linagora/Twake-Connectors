@@ -95,7 +95,11 @@ class Event
             $data["language"] = $user["object"]["language"];
             $data["userimage"] =  $user["object"]["thumbnail"] ;
             $data["mode"] = $parameters["mode"];
-            $data["onlyoffice_server"] = "https://onlyoffice.apps.twakeapp.com";
+
+            $configuration = (new ConnectorDefinition())->configuration;
+            $r7_domain = $this->app->getContainer()->getParameter("defaults.connectors.r7.domain", $configuration["domain"]);
+
+            $data["onlyoffice_server"] = $r7_domain;
             $data["defaultExtension"] = $parameters["defaultExtension"];
             $data["color"] = $parameters["color"];
             $data["modeName"] = $parameters["name"];

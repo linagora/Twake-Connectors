@@ -3,11 +3,18 @@ namespace BuiltInConnectors\Connectors\R7;
 
 class ConnectorDefinition
 {
+
   public $configuration = [
-    //TODO add configuration needed for this connector
+    "domain" => "https://onlyoffice.apps.twakeapp.com"
   ];
 
-  public $definition = [
+  public function __construct($app = null) {
+    $server_route = "";
+    if($app){
+      $server_route = rtrim($this->app->getContainer()->getParameter("env.server_name"), "/") . "/r7_office";
+    }
+
+    $this->definition = [
       'app_group_name' => 'twake',
       'categories' => [],
       'name' => 'R7',
@@ -27,8 +34,8 @@ class ConnectorDefinition
       'display' => [
         'drive_module' => [
           'can_open_files' => [
-            'url' => 'https://connectors.api.twake.app/only_office/load',
-            'preview_url' => 'https://connectors.api.twake.app/only_office/load?preview=1',
+            'url' => $server_route . '/load',
+            'preview_url' => $server_route . '/load?preview=1',
             'main_ext' => [
               'xlsx',
               'pptx',
@@ -48,24 +55,27 @@ class ConnectorDefinition
           ],
           'can_create_files' => [
             [
-              'url' => 'https://connectors.api.twake.app/public/onlyoffice/empty.docx',
+              'url' => $server_route . '/empty?extension=docx',
               'filename' => 'Untitled.docx',
-              'name' => 'ONLYOFFICE Word Document',
+              'name' => 'R7 Word Document',
             ],
             [
-              'url' => 'https://connectors.api.twake.app/public/onlyoffice/empty.xlsx',
+              'url' => $server_route . '/empty?extension=xlsx',
               'filename' => 'Untitled.xlsx',
-              'name' => 'ONLYOFFICE Excel Document',
+              'name' => 'R7 Excel Document',
             ],
             [
-              'url' => 'https://connectors.api.twake.app/public/onlyoffice/empty.pptx',
+              'url' => $server_route . '/empty?extension=pptx',
               'filename' => 'Untitled.pptx',
-              'name' => 'ONLYOFFICE PowerPoint Document',
+              'name' => 'R7 PowerPoint Document',
             ],
           ],
         ],
       ],
       'api_allowed_ips' => '*',
       'api_event_url' => '/event'
-  ];
+    ];
+  }
+
+  public $definition = [];
 }
