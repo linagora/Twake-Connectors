@@ -2,6 +2,8 @@
 
 
 namespace BuiltInConnectors\Connectors\R7\Services;
+
+use BuiltInConnectors\Connectors\R7\ConnectorDefinition;
 use BuiltInConnectors\Connectors\R7\Entity\OnlyofficeFile;
 use BuiltInConnectors\Connectors\R7\Entity\OnlyofficeFileKeys;
 use Common\Http\Response;
