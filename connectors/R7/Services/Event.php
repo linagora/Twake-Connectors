@@ -15,15 +15,16 @@ class Event
 
     public function __construct($app) {
         $this->main_service = $app->getServices()->get("connectors.common.main");
+        $this->app = $app;
     }
 
     public function setConfiguration(){
         $configuration = (new ConnectorDefinition())->configuration;
         $this->r7_domain = $this->app->getContainer()->getParameter("defaults.connectors.r7_office.domain", $configuration["domain"]);
 
-        $this->APIPUBLICKEY_SLIDE = $this->getParameter("defaults.connectors.r7_office.apipubkey_slide", $configuration["apipubkey_slide"]);
-        $this->APIPUBLICKEY_SPREADSHEET = $this->getParameter("defaults.connectors.r7_office.apipubkey_spreadsheet", $configuration["apipubkey_spreadsheet"]);
-        $this->APIPUBLICKEY_TEXT = $this->getParameter("defaults.connectors.r7_office.apipubkey_text", $configuration["apipubkey_text"]);
+        $this->APIPUBLICKEY_SLIDE = $this->app->getContainer()->getParameter("defaults.connectors.r7_office.apipubkey_slide", $configuration["apipubkey_slide"]);
+        $this->APIPUBLICKEY_SPREADSHEET = $this->app->getContainer()->getParameter("defaults.connectors.r7_office.apipubkey_spreadsheet", $configuration["apipubkey_spreadsheet"]);
+        $this->APIPUBLICKEY_TEXT = $this->app->getContainer()->getParameter("defaults.connectors.r7_office.apipubkey_text", $configuration["apipubkey_text"]);
     }
 
     public function getParametersForMode($mode)

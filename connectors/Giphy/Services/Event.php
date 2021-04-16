@@ -9,13 +9,14 @@ class Event
 
     public function __construct($app)
     {
+        $this->app = $app;
         $this->main_service = $app->getServices()->get("connectors.common.main");
     }
 
     public function setConfiguration(){
         $configuration = (new ConnectorDefinition())->configuration;
         $this->domain = $this->app->getContainer()->getParameter("defaults.connectors.giphy.domain", $configuration["domain"]);
-        $this->apikey = $this->getParameter("defaults.connectors.giphy.apikey", $configuration["apikey"]);
+        $this->apikey = $this->app->getContainer()->getParameter("defaults.connectors.giphy.apikey", $configuration["apikey"]);
     }
 
     public function proceedEvent($type, $event, $data) {
