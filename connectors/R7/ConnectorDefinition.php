@@ -14,7 +14,7 @@ class ConnectorDefinition
   public function __construct($app = null) {
     $server_route = "";
     if($app){
-      $server_route = rtrim($this->app->getContainer()->getParameter("env.server_name"), "/") . "/r7_office";
+      $server_route = rtrim($app->getContainer()->getParameter("env.server_name"), "/") . "/r7_office";
     }
 
     $this->definition = [
