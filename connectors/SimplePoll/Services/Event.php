@@ -134,7 +134,10 @@ class Event
         $user = $data["user"];
 
         if(isset($data["message"]["id"]) && $data["message"]["id"]){
-            $data["message"]["hidden_data"] = $this->main_service->getDocument($data["message"]["id"]);
+            $saved = $this->main_service->getDocument($data["message"]["id"]);
+            if($saved){
+                $data["message"]["hidden_data"] = $saved;
+            }
         }
 
         if($type == "interactive_message_action" && explode("_", $event)[0] == "voteagain"){
