@@ -224,6 +224,8 @@ class Event
             );
             $this->main_service->postApi("messages/remove", $data_string);
 
+            error_log(json_encode($data));
+
             //Generate definitive message
             $channel = Array("id"=>$data["message"]["channel_id"]);
             $parent_message = Array("id"=>$data["message"]["parent_message_id"]);

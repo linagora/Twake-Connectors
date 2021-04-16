@@ -40,13 +40,13 @@ class Index extends BaseController
         $event = $request->request->get("event");
         $type = $request->request->get("type");
 
-        $this->get('connectors.incomming.event')->ephemeralEvent($type, $event, $data);
+        $this->get('connectors.incoming_webhooks.event')->ephemeralEvent($type, $event, $data);
 
         return new Response("ok");
     }
     public function hook(Request $request, $id){
         $list = explode("_", $id);
-        $hook_entity = $this->get('connectors.incomming.event')->proceedWebHook($list[0], $list[1], $request);
+        $hook_entity = $this->get('connectors.incoming_webhooks.event')->proceedWebHook($list[0], $list[1], $request);
         return new Response($hook_entity);
     }
 

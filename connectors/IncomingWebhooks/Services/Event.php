@@ -13,6 +13,8 @@ class Event
     }
 
     function proceedWebHook($id_url, $random, $content){
+        $this->main_service->setConnector("incoming_webhooks");
+
         $entity = $this->main_service->getDocument($id_url);
         
         $group_id = $entity["group_id"];
@@ -107,6 +109,8 @@ class Event
     }
 
     public function ephemeralEvent($type, $event, $data){
+        $this->main_service->setConnector("incoming_webhooks");
+
         $group = $data["group"];
         $entity = null;
         $user = $data["user"];

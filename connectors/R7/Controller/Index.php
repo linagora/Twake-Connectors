@@ -42,7 +42,7 @@ class Index extends BaseController
     public function editor(Request $request)
     {
         $mode = explode("?", explode("/", explode("r7_office/", $_SERVER["REQUEST_URI"])[1])[0])[0];
-        $data = $this->get("connectors.r7.event")->editorAction($request, $mode, $this->get('session'));
+        $data = $this->get("connectors.r7.event")->editorAction($request, $mode);
 
         $loader = new \Twig\Loader\FilesystemLoader(realpath(__DIR__.'/../Views/'));
         $twig = new \Twig\Environment($loader, [
@@ -71,11 +71,11 @@ class Index extends BaseController
 
     public function open(Request $request)
     {
-        return $this->get("connectors.r7.event")->openAction($request, $this->get('session'));
+        return $this->get("connectors.r7.event")->openAction($request);
     }
 
     public function load(Request $request){
-        $data =  $this->get("connectors.r7.event")->loadAction($request, $this->get('session'));
+        $data =  $this->get("connectors.r7.event")->loadAction($request);
         if(!is_array($data)){
             return $data;
         }
