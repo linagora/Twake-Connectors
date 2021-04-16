@@ -20,7 +20,7 @@ class Event
 
     public function setConfiguration(){
         $configuration = (new ConnectorDefinition())->configuration;
-        $this->r7_domain = $this->app->getContainer()->getParameter("defaults.connectors.r7_office.domain", $configuration["domain"]);
+        $this->r7_domain = rtrim($this->app->getContainer()->getParameter("defaults.connectors.r7_office.domain", $configuration["domain"]), "/");
 
         $this->APIPUBLICKEY_SLIDE = $this->app->getContainer()->getParameter("defaults.connectors.r7_office.apipubkey_slide", $configuration["apipubkey_slide"]);
         $this->APIPUBLICKEY_SPREADSHEET = $this->app->getContainer()->getParameter("defaults.connectors.r7_office.apipubkey_spreadsheet", $configuration["apipubkey_spreadsheet"]);
