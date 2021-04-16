@@ -15,8 +15,19 @@ class Event
         $this->main_service = $app->getServices()->get("connectors.common.main");
     }
 
+    public function setConfiguration(){
+        $configuration = (new ConnectorDefinition())->configuration;
+        $this->r7_domain = $this->app->getContainer()->getParameter("defaults.connectors.r7_office.domain", $configuration["domain"]);
+
+        $this->APIPUBLICKEY_SLIDE = $this->getParameter("defaults.connectors.r7_office.apipubkey_slide", $configuration["apipubkey_slide"]);
+        $this->APIPUBLICKEY_SPREADSHEET = $this->getParameter("defaults.connectors.r7_office.apipubkey_spreadsheet", $configuration["apipubkey_spreadsheet"]);
+        $this->APIPUBLICKEY_TEXT = $this->getParameter("defaults.connectors.r7_office.apipubkey_text", $configuration["apipubkey_text"]);
+    }
+
     public function getParametersForMode($mode)
     {
+        $this->setConfiguration();
+
         switch ($mode) {
             case "presentation":
             case "slide":
@@ -56,8 +67,9 @@ class Event
 
     public function editorAction(Request $request, $mode, $session = null)
     {
-
-
+        $this->main_service->setConnector("r7_office");
+        $this->setConfiguration();
+        
         $parameters = $this->getParametersForMode(explode("/",$mode)[0]);
         $workspace_id = $request->query->all()["workspace_id"];
         $group_id = $request->query->all()["group_id"];
@@ -94,8 +106,7 @@ class Event
             $data["userimage"] =  $user["object"]["thumbnail"] ;
             $data["mode"] = $parameters["mode"];
 
-            $configuration = (new ConnectorDefinition())->configuration;
-            $r7_domain = $this->app->getContainer()->getParameter("defaults.connectors.r7.domain", $configuration["domain"]);
+            $r7_domain =  $this->r7_domain;
 
             $data["onlyoffice_server"] = $r7_domain;
             $data["defaultExtension"] = $parameters["defaultExtension"];
@@ -124,7 +135,9 @@ class Event
      */
     public function saveAction(Request $request)
     {
-
+        $this->main_service->setConnector("r7_office");
+        $this->setConfiguration();
+        
         $fToken = $request->query->get("token");
         $group_id = $request->query->get("groupId");
         $file_id = $request->query->get("fileId");
@@ -189,6 +202,9 @@ class Event
 
     public function openAction(Request $request, $session=null)
     {
+        $this->main_service->setConnector("r7_office");
+        $this->setConfiguration();
+        
         if($session){
           $user_id = $session->get('user_id');
         }
@@ -237,7 +253,9 @@ class Event
 
     public function readAction(Request $request, $mode)
     {
-
+        $this->main_service->setConnector("r7_office");
+        $this->setConfiguration();
+        
         $this->getParametersForMode($mode);
 
         $fToken = $request->query->all()["fileToken"];
@@ -275,7 +293,9 @@ class Event
 
 
     public function loadAction(Request $request, $session = null){
-
+        $this->main_service->setConnector("r7_office");
+        $this->setConfiguration();
+        
         $token = $request->query->all()["token"];
         $file_id = $request->query->all()["file_id"];
         $workspace_id = $request->query->all()["workspace_id"];
