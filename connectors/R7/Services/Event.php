@@ -79,10 +79,7 @@ class Event
         $file_id = $request->query->all()["file_id"];
         $preview = $request->query->all()["preview"];
 
-        if($session){
-          $user_id = $session->get('user_id');
-        }
-
+        $user_id = $this->getSession('user_id');
         
         $user = null;
         if($user_id) {
@@ -208,9 +205,7 @@ class Event
         $this->main_service->setConnector("r7_office");
         $this->setConfiguration();
         
-        if($session){
-          $user_id = $session->get('user_id');
-        }
+        $user_id = $this->getSession('user_id');
 
         if ($request->request->all()["user_id"] == $user_id && $user_id) {
 
@@ -314,11 +309,7 @@ class Event
 
         $user_id = $token_identity["user_id"];
 
-        if($session){
-          error_log("session is set, set ".$user_id);
-          error_log(get_class($session));
-          $session->set('user_id', $user_id);
-        }
+        $this->setSession('user_id', $user_id);
 
         $data_file =  $this->main_service->postApi("drive/find", array("workspace_id" => $workspace_id, "group_id" => $group_id, "element_id" => $file_id), 60);
         if (!$data_file)
@@ -350,6 +341,20 @@ class Event
 
     }
 
+
+    private function getSession($key) {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        return $_SESSION["r7_office_".$key];
+    }
+
+    private function setSession($key, $value) {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        $_SESSION["r7_office_".$key] = $value;
+    }
 
 
 }
