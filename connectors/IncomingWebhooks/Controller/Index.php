@@ -8,7 +8,7 @@ use Common\Http\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Common\Http\Response;
 
-class InCommingController extends BaseController
+class Index extends BaseController
 {
 
     public function icon()
