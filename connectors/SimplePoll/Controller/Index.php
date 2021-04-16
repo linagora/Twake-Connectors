@@ -5,6 +5,7 @@ namespace BuiltInConnectors\Connectors\SimplePoll\Controller;
 use Common\Http\Response;
 use Common\BaseController;
 use Common\Http\Request;
+use BuiltInConnectors\Connectors\SimplePoll\ConnectorDefinition;
 
 class Index extends BaseController
 {
@@ -29,7 +30,7 @@ class Index extends BaseController
 
       return new Response(file_get_contents($route));
     }
-    
+
     public function event(Request $request)
     {
         $data = $request->request->get("data");

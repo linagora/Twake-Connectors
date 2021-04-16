@@ -5,6 +5,7 @@ namespace BuiltInConnectors\Connectors\Giphy\Controller;
 use Common\BaseController;
 use Common\Http\Request;
 use Common\Http\Response;
+use BuiltInConnectors\Connectors\Giphy\ConnectorDefinition;
 
 class Index extends BaseController
 {
