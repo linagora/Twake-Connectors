@@ -7,6 +7,7 @@ use Common\BaseController;
 use Common\Http\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Common\Http\Response;
+use BuiltInConnectors\Connectors\IncomingWebhooks\ConnectorDefinition;
 
 class Index extends BaseController
 {

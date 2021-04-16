@@ -4,7 +4,6 @@ namespace BuiltInConnectors\Connectors\IncomingWebhooks;
 class ConnectorDefinition
 {
   public $configuration = [
-    'incoming_webhooks_domain' => 'meet.jit.si'
   ];
 
   public $definition = [
