@@ -21,10 +21,7 @@ class Event
     public function setConfiguration(){
         $configuration = (new ConnectorDefinition())->configuration;
         $this->r7_domain = rtrim($this->app->getContainer()->getParameter("defaults.connectors.r7_office.domain", $configuration["domain"]), "/");
-
-        $this->APIPUBLICKEY_SLIDE = $this->app->getContainer()->getParameter("defaults.connectors.r7_office.apipubkey_slide", $configuration["apipubkey_slide"]);
-        $this->APIPUBLICKEY_SPREADSHEET = $this->app->getContainer()->getParameter("defaults.connectors.r7_office.apipubkey_spreadsheet", $configuration["apipubkey_spreadsheet"]);
-        $this->APIPUBLICKEY_TEXT = $this->app->getContainer()->getParameter("defaults.connectors.r7_office.apipubkey_text", $configuration["apipubkey_text"]);
+        $this->jwt_secret = $this->app->getContainer()->getParameter("defaults.connectors.r7_office.jwt_secret", $configuration["jwt_secret"]);
     }
 
     public function getParametersForMode($mode)
@@ -84,7 +81,6 @@ class Event
         $user = null;
         if($user_id) {
             $user = $this->main_service->postApi("users/get", array("user_id" => $user_id, "group_id" => $group_id), 60);
-            error_log(json_encode($user));
             if (!$user){
               return array();
             }
@@ -94,7 +90,6 @@ class Event
         if ($user != null && isset($user["object"])) {
 
             $data_file =  $this->main_service->postApi("drive/find", array("workspace_id" => $workspace_id, "group_id" => $group_id, "element_id" => $file_id, "user_id" => $user_id), 60);
-            error_log(json_encode($data_file));
             if (!$data_file || !isset($data_file["object"]))
               return array();
 
@@ -119,7 +114,6 @@ class Event
             $data["groupid"] = $group_id;
             $data["fileType"] = $data_file["object"]["extension"];
             $data["preview"] = $preview?"true":"false";
-
 
             return $data;
 
@@ -200,11 +194,11 @@ class Event
         return new Response(Array("error" => 0));
     }
 
-    public function openAction(Request $request, $session=null)
+    public function openAction(Request $request, $mode, $session=null)
     {
         $this->main_service->setConnector("r7_office");
         $this->setConfiguration();
-        
+
         $user_id = $this->getSession('user_id');
 
         if ($request->request->all()["user_id"] == $user_id && $user_id) {
@@ -227,6 +221,16 @@ class Event
             ];
             $this->main_service->saveDocument("file_" . $file["file_id"] . "_" . $file["token"], $file);
 
+            $user = [];
+            if($user_id) {
+                $user = $this->main_service->postApi("users/get", array("user_id" => $user_id, "group_id" => $groupId), 60);
+                if (!$user){
+                    return array();
+                }
+            }
+
+            $preview = $request->request->all()["preview"] && $user["id"];
+
             $fileKey = $this->main_service->getDocument("file_keys_" . $fId);
             if (!$fileKey) {
                 $fileKey = [
@@ -238,11 +242,72 @@ class Event
             $fileKey["name"] = $filename;
             $this->main_service->saveDocument("file_keys_" . $fId, $fileKey);
 
+            $parameters = $this->getParametersForMode(explode("/",$mode)[0]);
+
+            $data = Array();
+            $data["userid"] = $user_id;
+            $data["username"] = $user["object"]["username"];
+            $data["language"] = $user["object"]["language"];
+            $data["userimage"] =  $user["object"]["thumbnail"] ;
+            $data["mode"] = $parameters["mode"];
+
+            $r7_domain =  $this->r7_domain;
+
+            $data["onlyoffice_server"] = $r7_domain;
+            $data["defaultExtension"] = $parameters["defaultExtension"];
+            $data["color"] = $parameters["color"];
+            $data["modeName"] = $parameters["name"];
+            $data["workspaceId"] = $workspaceId;
+            $data["server"] = $this->main_service->getServerBaseUrl();
+            $data["file_id"] = $fId;
+            $data["filename"] = $data_file["object"]["name"];
+            $data["groupid"] = $groupId;
+            $data["fileType"] = $data_file["object"]["extension"];
+            $data["preview"] = $preview?"true":"false";
+            $baseURL = $data["server"] . "r7_office/" . $data["mode"] . "/";
+
+            $configurationJson = '{
+                "documentType": "'.$data["mode"].'",
+                "document": {
+                    "title": "'.$filename.'",
+                    "url": "'.$baseURL.'read?fileToken='.$file["token"].'&fileId='.$fId.'&groupId='.$data["groupid"].'",
+                    "fileType": "'.$data["fileType"].'",
+                    "key": "'.$fileKey["key"].'",
+                    "file_id": "'.$fId.'",
+                    "permissions": {
+                        "download": true,
+                        "edit": '.$data["preview"].',
+                        "review": '.$data["preview"].'
+                    }
+                },
+                "editorConfig": {
+                    "mode": "'.($preview?"view":"edit").'",
+                    "callbackUrl": "'.$baseURL.'save?fileId='.$fId.'&token='.$file["token"].'&groupId='.$data["groupid"].'",
+                    "lang": "'.$data["language"].'",
+                    "user": {
+                        "id": "'.$data["userid"].'",
+                        "name": "'.$data["username"].'"
+                    },
+                    "customization": {
+                        "chat": false,
+                        "compactToolbar": true,
+                        "about": false,
+                        "feedback": false,
+                        "goback": {
+                            "text": "",
+                            "blank": false,
+                            "url": "#"
+                        }
+                    }
+                }
+            }';
+            
+            $configuration = json_decode($configurationJson, 1);
+            $signature = $this->genJWT($configuration);
+
             return new Response(Array(
-                "token" => $file["token"],
-                "key" => $fileKey["key"],
-                "file_id" => $fId,
-                "filename" => $filename
+                "signature" => $signature,
+                "configuration" => $configuration
             ));
 
         }
@@ -273,8 +338,9 @@ class Event
                     "workspace_id" => $file["workspace_id"],
                     "group_id" => $group_id,
                     "file_id" => $file["file_id"]
-
                 );
+
+                error_log("Downloading..." . json_encode($data));
 
                 echo $this->main_service->postApi("drive/download", $data, 60, true);
                 die();
@@ -302,7 +368,6 @@ class Event
 
 
         $token_identity =  $this->main_service->postApi("core/token", array("token" => $token), 60);
-        error_log(json_encode($token_identity));
         if (!$token_identity)
             return new Response(array("error" => "Invalid token"));
 
@@ -356,5 +421,26 @@ class Event
         $_SESSION["r7_office_".$key] = $value;
     }
 
+    private function genJWT($payload) {
+        function base64url_encode($data) {
+            return str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($data));
+        }
+
+        //build the headers
+        $headers = ['typ'=>'JWT', 'alg'=>'HS256'];
+        $headers_encoded = base64url_encode(json_encode($headers, JSON_UNESCAPED_SLASHES));
+
+        //build the payload
+        $payload_encoded = base64url_encode(json_encode($payload, JSON_UNESCAPED_SLASHES));
+
+        //build the signature
+        $key = $this->jwt_secret;
+        $signature = hash_hmac('sha256',"$headers_encoded.$payload_encoded",$key,true);
+        $signature_encoded = base64url_encode($signature);
+
+        //build and return token
+        $token = "$headers_encoded.$payload_encoded.$signature_encoded";
+        return $token;
+    }
 
 }

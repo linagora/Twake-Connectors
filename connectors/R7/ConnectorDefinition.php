@@ -6,9 +6,7 @@ class ConnectorDefinition
 
   public $configuration = [
     "domain" => "https://onlyoffice.apps.twakeapp.com",
-    "apipubkey_slide" => "",
-    "apipubkey_spreadsheet" => "",
-    "apipubkey_text" => "",
+    "jwt_secret" => ""
   ];
 
   public function __construct($app = null) {

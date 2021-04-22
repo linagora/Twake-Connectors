@@ -71,7 +71,8 @@ class Index extends BaseController
 
     public function open(Request $request)
     {
-        return $this->get("connectors.r7.event")->openAction($request);
+        $mode = explode("?", explode("/", explode("r7_office/", $_SERVER["REQUEST_URI"])[1])[0])[0];
+        return $this->get("connectors.r7.event")->openAction($request, $mode);
     }
 
     public function load(Request $request){

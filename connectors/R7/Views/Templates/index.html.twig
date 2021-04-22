@@ -36,61 +36,25 @@
         allowedextensions = ["xlsx", "csv", "fods", "ods", "xls", "xlsm", "xlt", "xltm", "xltx"];
     }
 
-    window.baseURL = "{{ server }}r7_office/" + window.mode + "/";
-
-    openFile = function (doc) {
-
-        var scrollSensitivity = 100;
-        if (mode != "text") {
-            scrollSensitivity = 40;
+    const defaultConfiguration = {
+        width: "100%",
+        height: "100%",
+        type: (screen.width < 600) ? 'mobile' : 'desktop',
+        events: {
+            'onReady': function () {
+            },
+            'onDocumentStateChange': function () {
+            },
+            'onRequestEditRights': function () {
+            },
+            'onError': function () {
+            },
+            'onOutdatedVersion': function () {
+            }
         }
-
-        document.querySelector("#onlyoffice_container").innerHTML = "<div id='onlyoffice_container_instance'></div>";
-
-        console.log(window.baseURL + "save?token=" + doc.token);
-
-        window.docEditor = new DocsAPI.DocEditor("onlyoffice_container_instance",
-            {
-                scrollSensitivity: scrollSensitivity,
-                width: "100%",
-                height: "100%",
-                documentType: mode,
-                document: doc,
-                token: doc.token,
-                type: (screen.width < 600) ? 'mobile' : 'desktop',
-                editorConfig: {
-                    callbackUrl: window.baseURL + "save?fileId="+doc.file_id+"&token=" + doc.token +"&groupId=" + "{{ groupid }}",
-                    "lang": window.user.language,
-                    "user": {
-                        "id": window.user.id,
-                        "name": window.user.username
-                    },
-                    customization: {
-                        chat: false,
-                        compactToolbar: true,
-                        about: false,
-                        feedback: false,
-                        goback: {
-                            text: "",
-                            blank: false,
-                            url: "#"
-                        }
-                    }
-                },
-                events: {
-                    'onReady': function () {
-                    },
-                    'onDocumentStateChange': function () {
-                    },
-                    'onRequestEditRights': function () {
-                    },
-                    'onError': function () {
-                    },
-                    'onOutdatedVersion': function () {
-                    }
-                }
-            });
     };
+
+    window.baseURL = "{{ server }}r7_office/" + window.mode + "/";
 
     fetch(window.baseURL + "open", {
         body: JSON.stringify({
@@ -98,28 +62,26 @@
             "filename": "{{ filename }}",
             "workspaceId": "{{ workspaceId }}",
             "user_id" : "{{ userid }}",
-            "groupId" : "{{ groupid }}"
+            "groupId" : "{{ groupid }}",
+            "preview": {{ preview }}
         }),
         method: 'POST',
-    }).then(response => response.json())
+    })
+    .then(response => response.json())
     .then(data => {
+        const serverConfiguration = data.configuration;
+        const token = data.signature;
+        
+        document.querySelector("#onlyoffice_container").innerHTML = "<div id='onlyoffice_container_instance'></div>";
 
-        var doc = {
-            title: data.filename,
-            url: window.baseURL + "read?fileToken="+data.token+"&fileId="+data.file_id+"&groupId="+"{{ groupid }}",
-            fileType: "{{ fileType }}",
-            key: data.key,
-            token: data.token,
-            file_id: "{{ file_id }}",
-            permissions: {
-                download: true,
-                edit: !{{ preview }},
-                review: !{{ preview }}
-            }
+        const conf = {
+            token,
+            ...serverConfiguration,
         };
-        console.log("read : " +doc.url);
 
-        openFile(doc);
+        console.log("Configuration: ", conf);
+
+        window.docEditor = new DocsAPI.DocEditor("onlyoffice_container_instance", conf);
     });
 </script>
 
