@@ -69,6 +69,21 @@ class Event
 
         $xml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOWARNING);
 
+        //Retrieve atom format
+        if($xml->entry){
+            $xml = json_decode(json_encode($xml), 1);
+            $item = [];
+            foreach($xml["entry"] as $entry){
+              $entry["link"] = $entry["link"]["@attributes"]["href"];
+              $entry["description"] = $entry["content"];
+              $item[] = $entry;
+            }
+            $xml["channel"] = [
+              'title' => $xml["title"],
+              'item' => $item
+            ];
+            $xml = json_decode(json_encode($xml));
+          }
 
         //check if link is corresponding to rss
         if(!isset($xml->channel)){
