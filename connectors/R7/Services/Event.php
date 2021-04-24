@@ -276,8 +276,8 @@ class Event
                     "file_id": "'.$fId.'",
                     "permissions": {
                         "download": true,
-                        "edit": '.$data["preview"].',
-                        "review": '.$data["preview"].'
+                        "edit": '.($preview?"false":"true").',
+                        "review": '.($preview?"false":"true").'
                     }
                 },
                 "editorConfig": {
