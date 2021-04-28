@@ -12,7 +12,7 @@ class ConnectorDefinition
   public function __construct($app = null) {
     $server_route = "";
     if($app){
-      $server_route = rtrim($app->getContainer()->getParameter("env.server_name"), "/") . "/onlyoffice";
+      $server_route = rtrim($app->getContainer()->getParameter("env.server_name"), "/") . "/bundle/connectors/onlyoffice";
     }
 
     $this->definition = [
